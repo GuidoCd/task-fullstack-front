@@ -61,7 +61,7 @@ const props = defineProps<{
 
 const isSubmitting = ref(false); // <-- Nuevo estado
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'task-updated']);
 
 const taskStore = useTaskStore();
 
@@ -100,11 +100,12 @@ const handleSubmit = async () => {
   try {
     if (isEditMode.value && props.taskToEdit) {
       await taskStore.updateTask(props.taskToEdit.id, form.value);
+      emit('task-updated');
     } else {
       // Llama a la acción de crear
       await taskStore.addTask(form.value);
+      emit('close');
     }
-    emit('close');
   } catch (error) {
     console.log(error)
     console.error("La operación falló");

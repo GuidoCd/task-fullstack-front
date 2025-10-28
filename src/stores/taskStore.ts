@@ -132,7 +132,6 @@ export const useTaskStore = defineStore('tasks', () => {
       ]);
       priorities.value = priorityResponse.data.data;
       tags.value = tagResponse.data.data;
-      console.log('Priorities and Tags loaded:', priorities.value, tags.value);
     } catch (error) {
       toast.error('Error al cargar datos para el formulario');
     }
