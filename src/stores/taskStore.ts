@@ -125,8 +125,8 @@ export const useTaskStore = defineStore('tasks', () => {
   const fetchPrioritiesAndTags = async () => {
     try {
       const [priorityResponse, tagResponse] = await Promise.all([
-        apiClient.get('/priorities'),
-        apiClient.get('/tags')
+        apiClient.get('/api/priorities'),
+        apiClient.get('/api/tags')
       ]);
       priorities.value = priorityResponse.data.data;
       tags.value = tagResponse.data.data;

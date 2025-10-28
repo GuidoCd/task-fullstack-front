@@ -10,25 +10,25 @@ interface ApiResponse<T> {
 
 export const TaskService = {
   async getAll(filters: TaskFilters = {}): Promise<Task[]> {
-    const response = await apiClient.get<ApiResponse<Task[]>>('/tasks', { params: filters });
+    const response = await apiClient.get<ApiResponse<Task[]>>('/api/tasks', { params: filters });
     return response.data.data;
   },
 
   async create(taskData: NewTaskPayload): Promise<Task> {
-    const response = await apiClient.post<ApiResponse<Task>>('/tasks', taskData);
+    const response = await apiClient.post<ApiResponse<Task>>('/api/tasks', taskData);
     return response.data.data;
   },
 
   async update(id: number, taskData: UpdateTaskPayload): Promise<Task> {
-    const response = await apiClient.patch<ApiResponse<Task>>(`/tasks/${id}`, taskData);
+    const response = await apiClient.patch<ApiResponse<Task>>(`/api/tasks/${id}`, taskData);
     return response.data.data;
   },
 
   async delete(id: number): Promise<void> {
-    await apiClient.delete(`/tasks/${id}`);
+    await apiClient.delete(`/api/tasks/${id}`);
   },
 
   async updateStatus(id: number, estado: string): Promise<void> {
-    await apiClient.patch(`/tasks/${id}`, { estado });
+    await apiClient.patch(`/api/tasks/${id}`, { estado });
   }
 };
