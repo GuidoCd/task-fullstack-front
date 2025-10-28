@@ -34,8 +34,8 @@
     <TaskFormModal :is-visible="isModalVisible" :task-to-edit="taskBeingEdited" @close="closeModal" />
   </div>
   <div>
-    <div v-if="taskStore.isLoading" class="text-center text-gray-500">
-      Cargando tareas...
+    <div v-if="taskStore.isLoading" class="flex justify-center items-center p-10">
+      <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
     </div>
 
     <div v-else class="space-y-4">
@@ -43,8 +43,8 @@
         <h3 class="font-bold text-lg">{{ task.titulo }}</h3>
         <p class="text-gray-600">{{ task.descripcion }}</p>
         <div class="mt-2 flex items-center justify-between">
-          <div class="relative">
-            <button @click="toggleStatusMenu(task.id)"
+          <div class="relative" v-click-outside="() => openStatusMenuId = null">
+            <button @click.stop="toggleStatusMenu(task.id)"
               class="px-2 py-1 text-xs font-semibold text-white rounded-full cursor-pointer transition-transform transform hover:scale-110"
               :class="getStatusColor(task.estado)">
               {{ task.estado }}
@@ -63,11 +63,13 @@
             {{ task.prioridad }}
           </span>
         </div>
-        <div class="mt-4 flex justify-end">
-          <button @click="openEditModal(task)" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+        <div class="mt-4 flex justify-end items-center border-t pt-3 space-x-2">
+          <button @click="openEditModal(task)"
+            class="px-3 py-1 text-xs font-medium text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             Editar
           </button>
-          <button @click="handleDelete(task.id)" class="text-sm font-medium text-red-600 hover:text-red-800">
+          <button @click="handleDelete(task.id)"
+            class="px-3 py-1 text-xs font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
             Eliminar
           </button>
         </div>

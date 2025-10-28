@@ -36,7 +36,8 @@
         </div>
 
         <div class="flex justify-end space-x-4">
-          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+          <button type="submit" :disabled="isSubmitting"
+            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
             {{ isEditMode ? 'Guardar Cambios' : 'Crear Tarea' }}
           </button>
           <button type="button" @click="$emit('close')"
@@ -57,6 +58,8 @@ const props = defineProps<{
   isVisible: boolean;
   taskToEdit: Task | null; // <-- Nueva prop
 }>();
+
+const isSubmitting = ref(false); // <-- Nuevo estado
 
 const emit = defineEmits(['close']);
 
@@ -93,18 +96,20 @@ watchEffect(() => {
 });
 
 const handleSubmit = async () => {
+  isSubmitting.value = true;
   try {
     if (isEditMode.value && props.taskToEdit) {
-      // Llama a la acción de actualizar
       await taskStore.updateTask(props.taskToEdit.id, form.value);
     } else {
       // Llama a la acción de crear
       await taskStore.addTask(form.value);
     }
-    emit('close'); // Cierra el modal si todo fue bien
+    emit('close');
   } catch (error) {
     console.log(error)
     console.error("La operación falló");
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
