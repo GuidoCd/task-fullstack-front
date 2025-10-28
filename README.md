@@ -1,54 +1,63 @@
-# task-fullstack-front
+# Task Management App (Frontend con Vue)
 
-This template should help get you started developing with Vue 3 in Vite.
+Esta es la interfaz de usuario para la aplicación de gestión de tareas, construida con Vue 3, Vite y Pinia.
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## ✨ Características
 
-## Recommended Browser Setup
+-   **CRUD completo** para tareas a través de una interfaz modal.
+-   **Cambio de estado** interactivo y con actualización optimista.
+-   **Filtrado dinámico** por estado y fecha de vencimiento.
+-   Gestión de estado centralizada con **Pinia**.
+-   Diseño limpio y responsive con **Tailwind CSS**.
+-   Notificaciones "Toast" para feedback del usuario.
+-   Pruebas unitarias del store con **Vitest**.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+---
 
-## Type Support for `.vue` Imports in TS
+## 💻 Stack Tecnológico
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+-   Vue 3 (Composition API)
+-   Vite
+-   TypeScript
+-   Pinia (State Management)
+-   Vue Router
+-   Tailwind CSS
+-   Axios
+-   Vitest (para pruebas)
 
-## Customize configuration
+---
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## 🚀 Instalación y Puesta en Marcha
 
-## Project Setup
+Asegúrate de tener **Node.js** (versión 18 o superior) instalado.
 
-```sh
-npm install
-```
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone [https://github.com/tu-usuario/tu-repo-frontend.git](https://github.com/tu-usuario/tu-repo-frontend.git)
+    cd tu-repo-frontend
+    ```
 
-### Compile and Hot-Reload for Development
+2.  **Instalar dependencias de NPM:**
+    ```bash
+    npm install
+    ```
 
-```sh
-npm run dev
-```
+3.  **Configurar la URL de la API:**
+    Asegúrate de que el backend de Laravel esté corriendo. Luego, abre el archivo `src/api/axios.ts` y verifica que la `baseURL` apunte a la dirección correcta de tu API (ej. `http://localhost` o `http://localhost:8080` si usas un puerto diferente).
 
-### Type-Check, Compile and Minify for Production
+4.  **Ejecutar el servidor de desarrollo:**
+    ```bash
+    npm run dev
+    ```
 
-```sh
-npm run build
-```
+¡Listo! La aplicación ahora está corriendo, usualmente en `http://localhost:5173`.
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+---
 
-```sh
-npm run test:unit
-```
+## ⚙️ Comandos Útiles
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+-   **Iniciar el servidor de desarrollo:** `npm run dev`
+-   **Ejecutar las pruebas unitarias:** `npm run test:unit`
+-   **Construir para producción:** `npm run build`
