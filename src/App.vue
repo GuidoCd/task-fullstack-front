@@ -1,11 +1,14 @@
-<script setup lang="ts"></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div class="bg-gray-100 min-h-screen">
+    <header class="bg-white shadow-md p-4">
+      <h1 class="text-2xl font-bold text-gray-800">Gestor de Tareas</h1>
+    </header>
+    <main class="p-8">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import { RouterView } from 'vue-router'
+</script>
