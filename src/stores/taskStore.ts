@@ -3,6 +3,11 @@ import { defineStore } from 'pinia'
 import apiClient from '@/api/axios'
 import { useToast } from 'vue-toastification'
 
+export interface TaskFilters {
+  estado?: string;
+  fecha_vencimiento?: string;
+}
+
 export interface Priority {
   id: number;
   prioridad: 'BAJA' | 'MEDIA' | 'ALTA';
@@ -48,18 +53,24 @@ export const useTaskStore = defineStore('tasks', () => {
 
   const isLoading = ref(false)
 
-  const fetchTasks = async () => {
-    isLoading.value = true
+  const fetchTasks = async (filters: TaskFilters = {}) => {
+    isLoading.value = true;
     try {
-      const response = await apiClient.get('/tasks')
+      // Limpiamos los filtros para no enviar valores vacíos
+      const cleanFilters: Record<string, string> = {};
+      if (filters.estado) cleanFilters.estado = filters.estado;
+      if (filters.fecha_vencimiento) cleanFilters.fecha_vencimiento = filters.fecha_vencimiento;
 
-      tasks.value = response.data.data
+      // Axios convierte el objeto 'params' en query parameters (?estado=pendiente)
+      const response = await apiClient.get('/tasks', {
+        params: cleanFilters
+      });
+      tasks.value = response.data.data;
     } catch (error) {
-      toast.error('Error al cargar las tareas')
-      console.error('Error fetching tasks:', error)
+      toast.error('Error al cargar las tareas');
+      console.error('Error fetching tasks:', error);
     } finally {
-
-      isLoading.value = false
+      isLoading.value = false;
     }
   }
 

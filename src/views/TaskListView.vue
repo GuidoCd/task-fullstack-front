@@ -5,6 +5,31 @@
         + Crear Tarea
       </button>
     </div>
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label for="filter-estado" class="block text-sm font-medium text-gray-700">Estado</label>
+          <select v-model="filters.estado" id="filter-estado"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="en_progreso">En Progreso</option>
+            <option value="completada">Completada</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-fecha" class="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
+          <input v-model="filters.fecha_vencimiento" type="date" id="filter-fecha"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+        </div>
+        <div class="self-end">
+          <button @click="filters.estado = ''; filters.fecha_vencimiento = ''"
+            class="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
 
     <TaskFormModal :is-visible="isModalVisible" :task-to-edit="taskBeingEdited" @close="closeModal" />
   </div>
@@ -52,14 +77,23 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useTaskStore, type Task } from '@/stores/taskStore'
+import { onMounted, ref, watch } from 'vue'
+import { useTaskStore, type Task, type TaskFilters } from '@/stores/taskStore'
 import TaskFormModal from '@/components/TaskFormModal.vue'
 
 const taskStore = useTaskStore()
+const filters = ref<TaskFilters>({
+  estado: '',
+  fecha_vencimiento: '',
+});
+
 const isModalVisible = ref(false)
 const taskBeingEdited = ref<Task | null>(null);
 const openStatusMenuId = ref<number | null>(null);
+
+watch(filters, () => {
+  taskStore.fetchTasks(filters.value);
+}, { deep: true });
 
 onMounted(() => {
   taskStore.fetchTasks()
