@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import apiClient from '@/api/axios'
 import { useToast } from 'vue-toastification'
+import { TaskService } from '@/services/TaskService';
 
 export interface TaskFilters {
   estado?: string;
@@ -62,10 +63,7 @@ export const useTaskStore = defineStore('tasks', () => {
       if (filters.fecha_vencimiento) cleanFilters.fecha_vencimiento = filters.fecha_vencimiento;
 
       // Axios convierte el objeto 'params' en query parameters (?estado=pendiente)
-      const response = await apiClient.get('/tasks', {
-        params: cleanFilters
-      });
-      tasks.value = response.data.data;
+      tasks.value = await TaskService.getAll(filters);
     } catch (error) {
       toast.error('Error al cargar las tareas');
       console.error('Error fetching tasks:', error);
@@ -77,12 +75,12 @@ export const useTaskStore = defineStore('tasks', () => {
   const updateTask = async (taskId: number, taskData: UpdateTaskPayload) => {
     isLoading.value = true;
     try {
-      const response = await apiClient.patch(`/tasks/${taskId}`, taskData);
+      const updatedTask = await TaskService.update(taskId, taskData);
       // Busca el índice de la tarea actualizada en nuestro array local
       const index = tasks.value.findIndex(t => t.id === taskId);
       if (index !== -1) {
         // Reemplaza la tarea vieja con la nueva versión de la API
-        tasks.value[index] = response.data.data;
+        tasks.value[index] = updatedTask;
       }
       toast.success('¡Tarea actualizada con éxito!');
     } catch (error: any) {
@@ -114,7 +112,7 @@ export const useTaskStore = defineStore('tasks', () => {
     task.estado = newStatus;
     // 1. Encuentra la tarea y guarda su estado original
     try {
-      await apiClient.patch(`/tasks/${taskId}`, { estado: newStatus });
+      await TaskService.updateStatus(taskId, newStatus);
       toast.success('Estado actualizado');
     } catch (error) {
       // 6. Si falla, revierte el cambio en la UI y notifica al usuario
@@ -140,12 +138,10 @@ export const useTaskStore = defineStore('tasks', () => {
   const addTask = async (taskData: NewTaskPayload) => {
     isLoading.value = true;
     try {
-      const response = await apiClient.post('/tasks', taskData);
-      // Añade la nueva tarea al principio de la lista para verla inmediatamente
-      tasks.value.unshift(response.data.data);
-      toast.success('¡Tarea creada con éxito!');
+      const newTask = await TaskService.create(taskData);
+      tasks.value.unshift(newTask);
+      toast.success('¡Tarea creada!');
     } catch (error: any) {
-      // Manejo de errores de validación de Laravel
       if (error.response && error.response.status === 422) {
         const errors = error.response.data.errors;
         let errorMessage = 'Error de validación:';
@@ -167,8 +163,7 @@ export const useTaskStore = defineStore('tasks', () => {
     // Opcional: podrías activar un 'isLoading' específico para esta tarea.
     try {
       // La API devuelve 204 No Content, por lo que no hay datos en la respuesta.
-      await apiClient.delete(`/tasks/${taskId}`);
-
+      await TaskService.delete(taskId);
       // Actualiza el estado local eliminando la tarea del array.
       tasks.value = tasks.value.filter(task => task.id !== taskId);
 
