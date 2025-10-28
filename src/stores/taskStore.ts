@@ -28,6 +28,14 @@ export interface NewTaskPayload {
   tags: number[];
 }
 
+export interface UpdateTaskPayload {
+  titulo?: string;
+  descripcion?: string;
+  estado?: 'pendiente' | 'en_progreso' | 'completada';
+  priority_id?: number;
+  tags?: number[];
+}
+
 export const useTaskStore = defineStore('tasks', () => {
   const toast = useToast()
 
@@ -49,6 +57,35 @@ export const useTaskStore = defineStore('tasks', () => {
     } finally {
 
       isLoading.value = false
+    }
+  }
+
+  const updateTask = async (taskId: number, taskData: UpdateTaskPayload) => {
+    isLoading.value = true;
+    try {
+      const response = await apiClient.patch(`/tasks/${taskId}`, taskData);
+      // Busca el índice de la tarea actualizada en nuestro array local
+      const index = tasks.value.findIndex(t => t.id === taskId);
+      if (index !== -1) {
+        // Reemplaza la tarea vieja con la nueva versión de la API
+        tasks.value[index] = response.data.data;
+      }
+      toast.success('¡Tarea actualizada con éxito!');
+    } catch (error: any) {
+      // ... (el manejo de errores es idéntico al de addTask)
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors;
+        let errorMessage = 'Error de validación:';
+        for (const key in errors) {
+          errorMessage += `\n- ${errors[key][0]}`;
+        }
+        toast.error(errorMessage);
+      } else {
+        toast.error('Error al actualizar la tarea');
+      }
+      throw error;
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -92,6 +129,22 @@ export const useTaskStore = defineStore('tasks', () => {
     }
   }
 
+  const deleteTask = async (taskId: number) => {
+    // Opcional: podrías activar un 'isLoading' específico para esta tarea.
+    try {
+      // La API devuelve 204 No Content, por lo que no hay datos en la respuesta.
+      await apiClient.delete(`/tasks/${taskId}`);
+
+      // Actualiza el estado local eliminando la tarea del array.
+      tasks.value = tasks.value.filter(task => task.id !== taskId);
+
+      toast.success('Tarea eliminada con éxito');
+    } catch (error) {
+      toast.error('Error al eliminar la tarea');
+      console.error('Error deleting task:', error);
+    }
+  }
+
 
   return {
     tasks,
@@ -101,5 +154,7 @@ export const useTaskStore = defineStore('tasks', () => {
     fetchTasks,
     fetchPrioritiesAndTags,
     addTask,
+    updateTask,
+    deleteTask,
   }
 })
