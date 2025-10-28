@@ -18,9 +18,22 @@
         <h3 class="font-bold text-lg">{{ task.titulo }}</h3>
         <p class="text-gray-600">{{ task.descripcion }}</p>
         <div class="mt-2 flex items-center justify-between">
-          <span class="px-2 py-1 text-xs font-semibold text-white rounded-full" :class="getStatusColor(task.estado)">
-            {{ task.estado }}
-          </span>
+          <div class="relative">
+            <button @click="toggleStatusMenu(task.id)"
+              class="px-2 py-1 text-xs font-semibold text-white rounded-full cursor-pointer transition-transform transform hover:scale-110"
+              :class="getStatusColor(task.estado)">
+              {{ task.estado }}
+            </button>
+            <div v-if="openStatusMenuId === task.id"
+              class="absolute bottom-full mb-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+              <ul>
+                <li v-for="status in availableStatuses" :key="status" @click="changeStatus(task.id, status)"
+                  class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                  {{ status }}
+                </li>
+              </ul>
+            </div>
+          </div>
           <span class="text-sm font-medium text-blue-600">
             {{ task.prioridad }}
           </span>
@@ -46,10 +59,22 @@ import TaskFormModal from '@/components/TaskFormModal.vue'
 const taskStore = useTaskStore()
 const isModalVisible = ref(false)
 const taskBeingEdited = ref<Task | null>(null);
+const openStatusMenuId = ref<number | null>(null);
 
 onMounted(() => {
   taskStore.fetchTasks()
 })
+
+const availableStatuses: Task['estado'][] = ['pendiente', 'en_progreso', 'completada'];
+
+const toggleStatusMenu = (taskId: number) => {
+  openStatusMenuId.value = openStatusMenuId.value === taskId ? null : taskId;
+};
+
+const changeStatus = (taskId: number, newStatus: Task['estado']) => {
+  taskStore.updateTaskStatus(taskId, newStatus);
+  openStatusMenuId.value = null; // Cierra el menú
+};
 
 const handleDelete = (taskId: number) => {
   // Buena Práctica de UX: Siempre pide confirmación para acciones destructivas.

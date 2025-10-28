@@ -12,11 +12,14 @@ export interface Tag {
   id: number;
   etiqueta: 'DEV' | 'QA' | 'RRHH';
 }
+
+type TaskStatus = 'pendiente' | 'en_progreso' | 'completada';
+
 export interface Task {
   id: number;
   titulo: string;
   descripcion: string;
-  estado: 'pendiente' | 'en_progreso' | 'completada';
+  estado: TaskStatus;
   prioridad: string;
   etiquetas: string[];
 }
@@ -89,6 +92,27 @@ export const useTaskStore = defineStore('tasks', () => {
     }
   }
 
+  const updateTaskStatus = async (taskId: number, newStatus: TaskStatus) => {
+
+    const task = tasks.value.find(t => t.id === taskId);
+    if (!task) {
+      console.error('Tarea no encontrada para actualizar estado.');
+      return;
+    }
+    const originalStatus = task.estado;
+    task.estado = newStatus;
+    // 1. Encuentra la tarea y guarda su estado original
+    try {
+      await apiClient.patch(`/tasks/${taskId}`, { estado: newStatus });
+      toast.success('Estado actualizado');
+    } catch (error) {
+      // 6. Si falla, revierte el cambio en la UI y notifica al usuario
+      task.estado = originalStatus;
+      toast.error('No se pudo actualizar el estado');
+      console.error('Error updating status:', error);
+    }
+  }
+
   const fetchPrioritiesAndTags = async () => {
     try {
       const [priorityResponse, tagResponse] = await Promise.all([
@@ -156,5 +180,6 @@ export const useTaskStore = defineStore('tasks', () => {
     addTask,
     updateTask,
     deleteTask,
+    updateTaskStatus,
   }
 })
