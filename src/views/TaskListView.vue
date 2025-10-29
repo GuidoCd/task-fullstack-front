@@ -45,7 +45,8 @@
         <h3 class="font-bold text-lg">{{ task.titulo }}</h3>
         <p class="text-gray-600">{{ task.descripcion }}</p>
         <div class="mt-2 flex items-center justify-between">
-          <div class="relative" v-click-outside="() => openStatusMenuId = null">
+          <div v-if="authStore.user?.id === task.user_id" class="relative"
+            v-click-outside="() => openStatusMenuId = null">
             <button @click.stop="toggleStatusMenu(task.id, $event)"
               class="px-2 py-1 text-xs font-semibold text-white rounded-full cursor-pointer transition-transform transform hover:scale-110"
               :class="getStatusColor(task.estado)">
@@ -63,6 +64,11 @@
               </div>
             </Teleport>
           </div>
+          <div v-else class="flex items-center gap-2">
+            <span class="px-2 py-1 text-xs font-medium text-white rounded-full" :class="getStatusColor(task.estado)">
+              {{ task.prioridad }}
+            </span>
+          </div>
           <div v-if="task.etiquetas && task.etiquetas.length" class="flex items-center flex-wrap gap-2">
             <span v-for="tag in task.etiquetas" :key="tag" class="px-2 py-1 text-xs font-medium text-white rounded-full"
               :class="getTagColor(tag)">
@@ -73,7 +79,8 @@
             {{ task.prioridad }}
           </span>
         </div>
-        <div class="mt-4 flex justify-end items-center border-t pt-3 space-x-2">
+        <div v-if="authStore.user?.id === task.user_id"
+          class="mt-4 flex justify-end items-center border-t pt-3 space-x-2">
           <button @click="openEditModal(task)"
             class="px-3 py-1 text-xs font-medium text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             Editar
@@ -84,6 +91,7 @@
           </button>
         </div>
       </div>
+      <AppPagination :meta="taskStore.paginationMeta" @page-change="changePage" />
     </div>
 
     <TaskFormModal :is-visible="isModalVisible" :task-to-edit="taskBeingEdited" @close="closeModal"
@@ -95,11 +103,22 @@
 import { nextTick, onMounted, ref, watch } from 'vue'
 import { useTaskStore, type Task, type TaskFilters } from '@/stores/taskStore'
 import TaskFormModal from '@/components/TaskFormModal.vue'
+import { useAuthStore } from '@/stores/authStore';
+import AppPagination from '@/components/AppPagination.vue';
 
 const listContainer = ref<HTMLElement | null>(null);
 const scrollPosition = ref(0);
 
 const taskStore = useTaskStore()
+const authStore = useAuthStore();
+
+const changePage = (page: number) => {
+  if (page < 1 || page > (taskStore.paginationMeta?.last_page ?? 1)) {
+    return;
+  }
+  taskStore.fetchTasks(filters.value, page);
+};
+
 const filters = ref<TaskFilters>({
   estado: '',
   fecha_vencimiento: '',
@@ -111,7 +130,7 @@ const menuStyle = ref({});
 const openStatusMenuId = ref<number | null>(null);
 
 watch(filters, () => {
-  taskStore.fetchTasks(filters.value);
+  taskStore.fetchTasks(filters.value, 1);
 }, { deep: true });
 
 onMounted(() => {

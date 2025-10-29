@@ -1,7 +1,7 @@
 // src/services/TaskService.ts
 
 import apiClient from '@/api/axios';
-import type { Task, NewTaskPayload, UpdateTaskPayload, TaskFilters } from '@/stores/taskStore'; // Reutilizamos las interfaces
+import type { Task, NewTaskPayload, UpdateTaskPayload, TaskFilters, PaginatedTasksResponse } from '@/stores/taskStore'; // Reutilizamos las interfaces
 
 // Definimos la estructura de la respuesta de la API
 interface ApiResponse<T> {
@@ -9,9 +9,11 @@ interface ApiResponse<T> {
 }
 
 export const TaskService = {
-  async getAll(filters: TaskFilters = {}): Promise<Task[]> {
-    const response = await apiClient.get<ApiResponse<Task[]>>('/api/tasks', { params: filters });
-    return response.data.data;
+  async getAll(filters: TaskFilters = {}, page: number = 1): Promise<PaginatedTasksResponse> { // <-- Devuelve el objeto completo
+    const response = await apiClient.get<PaginatedTasksResponse>('/api/tasks', {
+      params: { ...filters, page }
+    });
+    return response.data; // <-- Devuelve toda la respuesta (data, links, meta)
   },
 
   async create(taskData: NewTaskPayload): Promise<Task> {

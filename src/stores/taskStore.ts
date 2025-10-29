@@ -28,6 +28,7 @@ export interface Task {
   estado: TaskStatus;
   prioridad: string;
   etiquetas: string[];
+  user_id: number;
 }
 
 export interface NewTaskPayload {
@@ -45,25 +46,48 @@ export interface UpdateTaskPayload {
   tags?: number[];
 }
 
+export interface PaginatedTasksResponse {
+  data: Task[];
+  links: PaginationLinks;
+  meta: PaginationMeta;
+}
+
+export interface PaginationLinks {
+  first: string | null;
+  last: string | null;
+  prev: string | null;
+  next: string | null;
+}
+export interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
 export const useTaskStore = defineStore('tasks', () => {
   const toast = useToast()
 
   const tasks = ref<Task[]>([])
+  const paginationMeta = ref<PaginationMeta | null>(null);
   const priorities = ref<Priority[]>([])
   const tags = ref<Tag[]>([])
 
   const isLoading = ref(false)
 
-  const fetchTasks = async (filters: TaskFilters = {}) => {
+  const fetchTasks = async (filters: TaskFilters = {}, page: number = 1) => {
     isLoading.value = true;
     try {
-      // Limpiamos los filtros para no enviar valores vacíos
-      const cleanFilters: Record<string, string> = {};
+      const cleanFilters: Record<string, any> = { page };
       if (filters.estado) cleanFilters.estado = filters.estado;
       if (filters.fecha_vencimiento) cleanFilters.fecha_vencimiento = filters.fecha_vencimiento;
 
       // Axios convierte el objeto 'params' en query parameters (?estado=pendiente)
-      tasks.value = await TaskService.getAll(filters);
+      const response = await TaskService.getAll(filters, page);
+
+      // 2. Asignamos cada parte al estado correspondiente
+      tasks.value = response.data;
+      paginationMeta.value = response.meta;
     } catch (error) {
       toast.error('Error al cargar las tareas');
       console.error('Error fetching tasks:', error);
@@ -186,5 +210,6 @@ export const useTaskStore = defineStore('tasks', () => {
     updateTask,
     deleteTask,
     updateTaskStatus,
+    paginationMeta
   }
 })
